@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><div><a href="{{ url_for('admin_dashboard') }}" class="back">← Admin Dashboard</a><h1>{{ exam.title }}</h1><p class="muted">Question limit: {{ exam.question_limit }} · Added: {{ count }} · Remaining: {{ exam.question_limit - count }}</p></div><span class="pill">{{ exam.duration }} minutes</span></div>
+{% if count < exam.question_limit %}
+<section class="card"><h2>Add Question</h2>
+<form method="post">
+<label>Question<textarea name="question" rows="3" required></textarea></label>
+<div class="grid two">
+<label>Option A<input name="option_a" required></label><label>Option B<input name="option_b" required></label>
+<label>Option C<input name="option_c" required></label><label>Option D<input name="option_d" required></label>
+</div>
+<label>Correct answer<select name="correct_option" required><option value="">Choose correct option</option><option value="0">Option A</option><option value="1">Option B</option><option value="2">Option C</option><option value="3">Option D</option></select></label>
+<button class="primary">Add Question</button>
+</form>
+</section>
+{% else %}<div class="alert success">Question limit reached. No more questions can be added unless you delete a question or increase the limit in the database/admin extension.</div>{% endif %}
+<section class="card"><h2>Questions ({{ count }}/{{ exam.question_limit }})</h2>
+{% for q in questions %}
+<div class="question-card"><div><b>Q{{ loop.index }}. {{ q.question }}</b><div class="options-list">A. {{ q.option_a }} · B. {{ q.option_b }} · C. {{ q.option_c }} · D. {{ q.option_d }}</div><span class="small muted">Correct option: {{ ["A","B","C","D"][q.correct_option] }}</span></div><form method="post" action="{{ url_for('delete_question', question_id=q.id) }}" onsubmit="return confirm('Delete this question?')"><button class="danger">Delete</button></form></div>
+{% else %}<p class="muted">No questions added yet.</p>{% endfor %}
+</section>
+{% endblock %}

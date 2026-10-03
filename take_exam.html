@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ exam.title }} · Exam{% endblock %}
+{% block content %}
+<div class="page-head exam-title"><div><a class="back" href="{{ url_for('student_dashboard') }}">← Student Dashboard</a><h1>{{ exam.title }}</h1><p class="muted">Answer each question and submit before the timer ends.</p></div><div class="timer-box">Time remaining <strong id="timer">--:--</strong></div></div>
+<div id="save" class="save-status">✓ Checkpoint ready</div>
+<form id="examForm" method="post" class="exam-layout">
+<section class="card exam-main">
+<div class="progress-line"><span id="progressText">Question 1 of {{ questions|length }}</span><div class="progress"><div id="progressBar"></div></div></div>
+<div id="questions">
+{% for q in questions %}
+<div class="question" data-index="{{ loop.index0 }}" data-qid="{{ q.id }}" {% if not loop.first %}style="display:none"{% endif %}>
+<h2>Question {{ loop.index }}</h2><p class="question-text">{{ q.question }}</p>
+{% for text in [q.option_a,q.option_b,q.option_c,q.option_d] %}
+<label class="option"><input type="radio" name="q{{ q.id }}" value="{{ loop.index0 }}"> <span>{{ ["A","B","C","D"][loop.index0] }}.</span> {{ text }}</label>
+{% endfor %}
+</div>
+{% endfor %}
+</div>
+<input type="hidden" name="answers" id="answers">
+<div class="exam-controls"><button type="button" id="prev">Previous</button><button type="button" id="next" class="primary">Next</button><button type="submit" class="success" id="submitExam" onclick="return confirm('Submit your exam now?')">Submit Exam</button></div>
+</section>
+<aside class="card question-nav"><h3>Question Navigator</h3><p class="muted small">Select a number to jump to a question.</p><div id="qbuttons" class="qbuttons"></div><hr><button type="button" class="danger full" id="failure">Simulate System Failure</button><p class="small muted">Use this button to demonstrate rollback during your project presentation.</p></aside>
+</form>
+<div id="popup" class="popup"><div class="card popup-card"><div class="warning-icon">!</div><h2>Failure detected</h2><p>The system will restore the latest saved checkpoint and resume the exam.</p><div class="popup-actions"><button type="button" id="cancelRollback">Cancel</button><button type="button" class="primary" id="rollback">Rollback &amp; Resume</button></div></div></div>
+<script>
+window.EXAM_ID = {{ exam.id }};
+window.REMAINING = {{ attempt.remaining_time }};
+window.CHECKPOINT = {{ checkpoint|tojson }};
+window.QUESTION_COUNT = {{ questions|length }};
+</script>
+<script src="{{ url_for('static', filename='exam.js') }}"></script>
+{% endblock %}

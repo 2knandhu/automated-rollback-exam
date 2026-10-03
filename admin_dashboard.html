@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><div><h1>Admin Dashboard</h1><p class="muted">Create exams, manage question limits, and monitor student attempts.</p></div><span class="pill">Administrator</span></div>
+<div class="grid two">
+<section class="card">
+<h2>Create Exam</h2>
+<form method="post" action="{{ url_for('create_exam') }}">
+<label>Exam title<input name="title" placeholder="e.g. Python Basics" required></label>
+<div class="grid two">
+<label>Duration (minutes)<input type="number" name="duration" min="1" value="30" required></label>
+<label>Question limit<input type="number" name="question_limit" min="1" value="10" required></label>
+</div>
+<button class="primary">Create Exam</button>
+</form>
+</section>
+<section class="card">
+<h2>Create Student Account</h2>
+<form method="post" action="{{ url_for('create_student') }}">
+<label>Student username<input name="username" minlength="3" placeholder="student01" required></label>
+<label>Temporary password<input type="password" name="password" minlength="6" placeholder="At least 6 characters" required></label>
+<button>Create Student</button>
+</form>
+<p class="small muted">Share each student's login details privately.</p>
+</section>
+</div>
+<section class="card">
+<div class="section-head"><h2>Exams</h2><span class="pill">{{ exams|length }} total</span></div>
+{% if exams %}
+<div class="table-wrap"><table><thead><tr><th>Exam</th><th>Duration</th><th>Questions</th><th>Limit</th><th>Actions</th></tr></thead><tbody>
+{% for e in exams %}
+<tr><td><b>{{ e.title }}</b></td><td>{{ e.duration }} min</td><td>{{ e.question_count }}</td><td>{{ e.question_limit }}</td><td class="actions"><a class="button" href="{{ url_for('manage_questions', exam_id=e.id) }}">Manage Questions</a><form method="post" action="{{ url_for('delete_exam', exam_id=e.id) }}" onsubmit="return confirm('Delete this exam and all related attempts?')"><button class="danger">Delete</button></form></td></tr>
+{% endfor %}
+</tbody></table></div>
+{% else %}<p class="muted">No exams created yet.</p>{% endif %}
+</section>
+<div class="grid two">
+<section class="card"><h2>Student Accounts</h2>
+{% if students %}<div class="table-wrap"><table><thead><tr><th>Username</th><th>Created</th></tr></thead><tbody>{% for s in students %}<tr><td>{{ s.username }}</td><td>{{ s.created_at[:10] }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="muted">No students created yet.</p>{% endif %}
+</section>
+<section class="card"><h2>Recent Exam Attempts</h2>
+{% if attempts %}<div class="table-wrap"><table><thead><tr><th>Student</th><th>Exam</th><th>Status</th><th>Score</th></tr></thead><tbody>{% for a in attempts %}<tr><td>{{ a.username }}</td><td>{{ a.title }}</td><td><span class="pill">{{ a.status }}</span></td><td>{{ a.score if a.score is not none else "—" }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="muted">No attempts yet.</p>{% endif %}
+</section>
+</div>
+<section class="card"><h2>Failure / Rollback Logs</h2>
+{% if logs %}<div class="table-wrap"><table><thead><tr><th>Time</th><th>Student</th><th>Exam</th><th>Failure</th></tr></thead><tbody>{% for l in logs %}<tr><td>{{ l.created_at }}</td><td>{{ l.username or "Unknown" }}</td><td>{{ l.title or "Deleted exam" }}</td><td>{{ l.failure_type }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="muted">No failure logs yet.</p>{% endif %}
+</section>
+{% endblock %}

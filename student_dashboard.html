@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><div><h1>Student Dashboard</h1><p class="muted">Choose an exam. Your answers are checkpointed automatically.</p></div><span class="pill">Student</span></div>
+<div class="exam-cards">
+{% for e in exams %}
+<article class="card exam-card">
+<h2>{{ e.title }}</h2>
+<div class="meta"><span><b>{{ e.duration }}</b> minutes</span><span><b>{{ e.question_count }}</b> questions</span><span>Limit: {{ e.question_limit }}</span></div>
+{% if e.attempt_status == 'submitted' %}
+<p class="result">Submitted · Score: {{ e.attempt_score }}</p><button disabled>Already Submitted</button>
+{% elif e.question_count == 0 %}
+<p class="muted">Questions are not available yet.</p><button disabled>Unavailable</button>
+{% else %}
+<a class="button primary" href="{{ url_for('take_exam', exam_id=e.id) }}">{{ "Resume Exam" if e.attempt_status == "in_progress" else "Start Exam" }}</a>
+{% endif %}
+</article>
+{% else %}<section class="card"><p>No exams are available yet. Please check with your administrator.</p></section>{% endfor %}
+</div>
+{% endblock %}
